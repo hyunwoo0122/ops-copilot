@@ -1,60 +1,156 @@
-# 📚 ops-copilot — MLE 이직 준비 기록
+# 🤖 OpsCopilot — ログ異常検知システム
 
-> 일본 IT 기업 MLE 이직을 목표로 퇴근 후 1시간씩 공부한 기록입니다.
+> サーバーログから異常を自動検知するMLシステムです。  
+> 退勤後独学で開発中。
 
-## 🎯 목표
-- 목표 기업: 도쿄 IT 기업 MLE 포지션
-- 현재 진행: 6주차 완료 (Day 30)
+[![Python](https://img.shields.io/badge/Python-3.14-blue)](https://www.python.org/)
+[![MLflow](https://img.shields.io/badge/MLflow-実験管理-orange)](https://mlflow.org/)
+[![pytest](https://img.shields.io/badge/pytest-テスト済-green)](https://pytest.org/)
 
-## 📁 폴더 구조
-ops-copilot/
-├── notebooks/   # 매일 Python 코드
-├── data/        # 로그 데이터
-└── docs/        # 학습 메모 + 회고
+---
 
-## 🛠️ 사용 기술
-- Python, numpy, pandas, scikit-learn
-- MLflow (실험 관리)
-- pytest (테스트)
-- Git (브랜치 + PR 방식)
-- Self-Attention (numpy 구현)  
+## 📌 概要
 
-## 🚀 실행 방법
-# 의존성 설치
+| 項目 | 内容 |
+|------|------|
+| 目的 | サーバーログの異常を自動検知し、運用チームの対応時間を短縮 |
+| 手法 | Self-Attention（再構成誤差）+ IsolationForest |
+| 現状 | プロトタイプ完成・実験管理・テスト導入済み |
+| 進捗 | 6週目完了（Day 30 / 全195日） |
+
+---
+
+## 🔍 解決する課題
+
+- 手動ログ監視による見落としリスクを削減
+- 障害対応時間の短縮
+- 正常ログのみで学習し、ラベルなしで異常を検知（Self-Supervised）
+
+---
+
+## 📊 現在の成果（数字で証明）
+
+### 5週目：実験管理基盤
+| 内容 | 結果 |
+|------|------|
+| MLflow 初回実験 | F1 = 0.65 |
+| contamination 比較（0.1 vs 0.2） | 最適 F1 = 0.65 |
+| pytest テスト | 3 passed ✅ |
+
+### 6週目：Attention ベース異常検知
+| 内容 | 結果 |
+|------|------|
+| Self-Attention numpy 実装 | Q·Kᵀ/√d_k → softmax → ·V |
+| LogBERT プロトタイプ | 正常スコア: 0.2707 / 異常スコア: 0.4874 ✅ |
+| threshold 探索（0.1〜0.7） | MLflow で7実験記録 |
+| pytest テスト | 3 passed ✅ |
+
+---
+
+## 🏗️ アーキテクチャ
+```
+ログシーケンス (seq_len, d_model)
+    → Self-Attention (Q=K=V=X)
+    → 再構成誤差計算 (|X - output|.mean())
+    → threshold 比較
+    → 正常 / 異常 判定
+```
+
+---
+
+## 🛠️ 技術スタック
+
+| カテゴリ | 技術 |
+|----------|------|
+| 言語 | Python 3.14 |
+| ML | scikit-learn, numpy |
+| 実験管理 | MLflow |
+| テスト | pytest |
+| バージョン管理 | Git（ブランチ + PR方式） |
+
+---
+
+## 🚀 実行方法
+```bash
+# 依存関係インストール
 pip install scikit-learn mlflow pytest numpy pandas
 
-# 실험 실행
-python notebooks/day23_mlflow_compare.py
+# 異常検知プロトタイプ実行
+python notebooks/day28_logbert_proto.py
 
-# 테스트 실행
-pytest notebooks/test_day24.py -v
+# threshold 探索
+python notebooks/day29_threshold_search.py
 
-# MLflow UI
+# テスト実行
+pytest notebooks/test_day29.py -v
+
+# MLflow UI（結果確認）
 mlflow ui
+# → http://127.0.0.1:5000
+```
 
-## 📊 5주차 주요 성과
-| 날짜 | 내용 | 결과 |
-|------|------|------|
-| Day 22 | MLflow 첫 실험 | F1=0.65 |
-| Day 23 | 실험 비교 (cont. 0.1 vs 0.2) | 최적=0.65 |
-| Day 24 | pytest 테스트 3개 | 3 passed |
+---
 
-## 📊 6주차 주요 성과 (Day 26~30)
-| 날짜   | 내용                        | 결과                          |
-|--------|---------------------------|-------------------------------|
-| Day 27 | Self-Attention numpy 구현  | Q·K.T/√d_k → softmax → ·V    |
-| Day 28 | LogBERT 프로토타입          | 정상 0.2707 / 이상 0.4874 분리 |
-| Day 29 | pytest 3개 + threshold 탐색 | 3 passed / 최적 threshold=0.1 |
+## 📁 フォルダ構成
+```
+ops-copilot/
+├── notebooks/
+│   ├── day27_self_attention.py    # Self-Attention 実装
+│   ├── day28_logbert_proto.py     # 異常検知プロトタイプ
+│   ├── day29_threshold_search.py  # threshold 探索
+│   └── test_day29.py              # pytest テスト
+├── data/                          # ログデータ
+└── README.md
+```
 
-## 🏗️ 현재 아키텍처 흐름
-로그 시퀀스 (seq_len, d_model)
-    → Self-Attention (Q=K=V=X)
-    → 재구성 오류 계산 (|X - output|.mean())
-    → threshold 비교
-    → 정상 / 이상 판단
+---
 
-## 💡 1개월차 핵심 습관
-1주차: 리팩터링    → 읽기 좋은 코드
-2주차: 예외처리    → 안 죽는 코드
-3주차: 하드코딩 금지 → 유연한 코드
-4주차: 회귀 테스트  → 버그 재발 방지
+## 💡 開発で意識していること
+```
+コードの可読性（可読性）  → 型ヒント・docstring・命名規則
+再現性                    → random seed固定・MLflow実験記録
+テスト習慣                → pytest・正常/境界値/エッジケース
+Anti-Pattern回避          → マジックナンバー禁止・グローバル変数禁止
+```
+
+---
+
+## 🗓️ 開発ロードマップ
+
+- [x] Week 1-4: データパイプライン + IsolationForest baseline
+- [x] Week 5  : MLflow 実験管理 + pytest 導入
+- [x] Week 6  : Self-Attention 実装 + LogBERT プロトタイプ
+- [ ] Week 7-8: LogBERT 本格学習 + FPR/Recall チューニング
+- [ ] Week 9-12: RAG パイプライン構築
+- [ ] Week 13-16: FastAPI + Docker サービス化
+- [ ] Week 17-20: AWS デプロイ + CI/CD
+
+---
+
+## 👤 作者
+
+**Hyunwoo** — 日本在住、MLE転職活動中  
+毎日退勤後1時間、ブランチ + PR方式で開発継続中
+```
+
+---
+
+### About 섹션도 같이 바꿔줘
+
+GitHub 저장소 오른쪽 ⚙️ 버튼 눌러서:
+```
+Description:
+🔍 ログ異常検知システム | Self-Attention + MLflow + pytest | MLE転職ポートフォリオ
+
+Topics:
+anomaly-detection, machine-learning, mlflow, self-attention, pytest, python, japanese
+```
+
+---
+
+### 링크드인에 올릴 때 한 줄 소개
+```
+OpsCopilotというログ異常検知システムを開発中です。
+Self-AttentionをNumPyでスクラッチ実装し、
+正常スコア0.27・異常スコア0.49の分離を確認しました。
+GitHub: https://github.com/hyunwoo0122/ops-copilot
