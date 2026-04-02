@@ -49,7 +49,7 @@
 ### 7週目：PyTorch 学習ベース異常検知
 | 内容 | 結果 |
 |------|------|
-| PyTorch AutoEncoder 実装 | 入出力 shape (100, 8) 確認 |
+| PyTorch AutoEncoder 実装 | 入出力 shape (batch, 8)→(batch, 8) 確認 |
 | Early Stopping + モデル保存 | 過学習防止・best_model.pt |
 | pytest テスト | 4 passed ✅ |
 
