@@ -1,11 +1,12 @@
 # 🤖 OpsCopilot — ログ異常検知システム
 
 > サーバーログから異常を自動検知するMLシステムです。  
-> 退勤後独学で開発中。
+> 退勤後1時間、独学で開発中。
 
 [![Python](https://img.shields.io/badge/Python-3.14-blue)](https://www.python.org/)
 [![MLflow](https://img.shields.io/badge/MLflow-実験管理-orange)](https://mlflow.org/)
 [![pytest](https://img.shields.io/badge/pytest-テスト済-green)](https://pytest.org/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-学習済-red)](https://pytorch.org/)
 
 ---
 
@@ -14,9 +15,9 @@
 | 項目 | 内容 |
 |------|------|
 | 目的 | サーバーログの異常を自動検知し、運用チームの対応時間を短縮 |
-| 手法 | Self-Attention（再構成誤差）+ IsolationForest |
-| 現状 | プロトタイプ完成・実験管理・テスト導入済み |
-| 進捗 | 6週目完了（Day 30 / 全195日） |
+| 手法 | PyTorch AutoEncoder + Self-Attention + IsolationForest |
+| 現状 | AutoEncoder学習済・実験管理・テスト導入済み |
+| 進捗 | 7週目完了（Day 35 / 全195日） |
 
 ---
 
@@ -45,13 +46,34 @@
 | threshold 探索（0.1〜0.7） | MLflow で7実験記録 |
 | pytest テスト | 3 passed ✅ |
 
+### 7週目：PyTorch 学習ベース異常検知
+| 内容 | 結果 |
+|------|------|
+| PyTorch AutoEncoder 実装 | 入出力 shape (100, 8) 確認 |
+| Early Stopping + モデル保存 | 過学習防止・best_model.pt |
+| pytest テスト | 4 passed ✅ |
+
 ---
 
-## 🏗️ アーキテクチャ
+## 🏆 最大の成果 — 学習効果を数字で証明
+
+| バージョン | 正常誤差 | 異常誤差 | 倍率 |
+|-----------|---------|---------|------|
+| 6週目 numpy（学習なし） | 0.2707 | 0.4874 | 1.8倍 |
+| 7週目 PyTorch（学習あり） | 0.1646 | 6.9236 | **42倍** |
+
+→ 学習を加えることで異常検知精度が **23倍向上**
+
+---
+
+## 🏗️ 現在のアーキテクチャ
 ```
 ログシーケンス (seq_len, d_model)
-    → Self-Attention (Q=K=V=X)
-    → 再構成誤差計算 (|X - output|.mean())
+    → LogAutoEncoder (nn.Module)
+        → Encoder: Linear(8→4) + ReLU
+        → Decoder: Linear(4→8)
+    → 再構成誤差計算 (MSELoss)
+    → Early Stopping (patience=3)
     → threshold 比較
     → 正常 / 異常 判定
 ```
@@ -63,7 +85,7 @@
 | カテゴリ | 技術 |
 |----------|------|
 | 言語 | Python 3.14 |
-| ML | scikit-learn, numpy |
+| ML | PyTorch, scikit-learn, numpy |
 | 実験管理 | MLflow |
 | テスト | pytest |
 | バージョン管理 | Git（ブランチ + PR方式） |
@@ -73,16 +95,16 @@
 ## 🚀 実行方法
 ```bash
 # 依存関係インストール
-pip install scikit-learn mlflow pytest numpy pandas
+pip install torch scikit-learn mlflow pytest numpy pandas
 
-# 異常検知プロトタイプ実行
-python notebooks/day28_logbert_proto.py
+# AutoEncoder 学習・評価
+python notebooks/day33_logbert_train.py
+
+# テスト実行
+pytest notebooks/test_day34.py -v
 
 # threshold 探索
 python notebooks/day29_threshold_search.py
-
-# テスト実行
-pytest notebooks/test_day29.py -v
 
 # MLflow UI（結果確認）
 mlflow ui
@@ -95,11 +117,13 @@ mlflow ui
 ```
 ops-copilot/
 ├── notebooks/
-│   ├── day27_self_attention.py    # Self-Attention 実装
-│   ├── day28_logbert_proto.py     # 異常検知プロトタイプ
-│   ├── day29_threshold_search.py  # threshold 探索
-│   └── test_day29.py              # pytest テスト
-├── data/                          # ログデータ
+│   ├── day27_self_attention.py     # Self-Attention 実装
+│   ├── day28_logbert_proto.py      # 異常検知プロトタイプ
+│   ├── day29_threshold_search.py   # threshold 探索
+│   ├── day32_pytorch_autoencoder.py # PyTorch AutoEncoder
+│   ├── day33_logbert_train.py      # Early Stopping + モデル保存
+│   └── test_day34.py               # pytest テスト（4ケース）
+├── data/                           # ログデータ
 └── README.md
 ```
 
@@ -107,22 +131,29 @@ ops-copilot/
 
 ## 💡 開発で意識していること
 ```
-コードの可読性（可読性）  → 型ヒント・docstring・命名規則
-再現性                    → random seed固定・MLflow実験記録
-テスト習慣                → pytest・正常/境界値/エッジケース
-Anti-Pattern回避          → マジックナンバー禁止・グローバル変数禁止
+コードの可読性  → 型ヒント・docstring・命名規則
+再現性          → random seed固定・MLflow実験記録
+テスト習慣      → pytest・正常/境界値/エッジケース
+Anti-Pattern回避 → マジックナンバー禁止・グローバル変数禁止
+過学習防止      → Early Stopping・モデル保存
 ```
 
 ---
 
 ## 🗓️ 開発ロードマップ
 
-- [x] Week 1-4: データパイプライン + IsolationForest baseline
-- [x] Week 5  : MLflow 実験管理 + pytest 導入
-- [x] Week 6  : Self-Attention 実装 + LogBERT プロトタイプ
-- [ ] Week 7-8: LogBERT 本格学習 + FPR/Recall チューニング
+- [x] Week 1-4 : データパイプライン + IsolationForest baseline
+- [x] Week 5   : MLflow 実験管理 + pytest 導入
+- [x] Week 6   : Self-Attention 実装 + LogBERT プロトタイプ
+- [x] Week 7   : PyTorch AutoEncoder + Early Stopping（42倍向上）
+- [ ] Week 8   : LogBERT 本格学習 + FPR/Recall チューニング
 - [ ] Week 9-12: RAG パイプライン構築
 - [ ] Week 13-16: FastAPI + Docker サービス化
 - [ ] Week 17-20: AWS デプロイ + CI/CD
 
 ---
+
+## 👤 作者
+
+**Hyunwoo** — 日本在住、MLE転職活動中  
+毎日退勤後1時間、ブランチ + PR方式で開発継続中
