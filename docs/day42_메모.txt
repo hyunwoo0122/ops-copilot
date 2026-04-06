@@ -1,0 +1,55 @@
+# Day 42 — sentence-transformers + FAISS + 시간복잡도 / 2026-05-12
+
+## 오늘 한 것
+- fake_embed → sentence-transformers 실제 임베딩으로 교체
+- FAISS IndexFlatIP + normalize_L2 로 코사인 유사도 검색 구현
+- 영어 모델 → 다국어 모델 교체로 한국어 검색 개선
+- 코딩테스트: 중복제거 + 정렬 패턴
+
+## 핵심 코드 패턴
+
+### RAG 임베딩
+vectors = model.encode(docs)
+vectors = np.array(vectors, dtype=np.float32) # FAISS는 float32 필수
+faiss.normalize_L2(vectors)                   # 코사인 유사도를 위한 정규화
+index = faiss.IndexFlatIP(dim)
+index.add(vectors)
+distances, indices = index.search(query_vec, top_k)
+
+### 코딩테스트
+def sorted_log(logs: list[str]) -> list[str]:
+    return sorted(set(logs))  # O(n log n)
+
+## 모델 비교 결과
+| 모델                              | 유사도 | CrashLoopBackOff 순위 |
+|----------------------------------|--------|----------------------|
+| all-MiniLM-L6-v2 (영어전용)       | 0.2224 | 미검색 ❌             |
+| paraphrase-multilingual-MiniLM-L12-v2 | 0.0966 | 2위 ✅          |
+
+## 핵심 교훈 4가지
+1. 모델 언어 선택이 검색 품질을 결정한다
+2. 유사도 0.09는 낮음 → 실무에선 threshold 설정 필요
+3. 한국어+영어 혼용 문서는 다국어 모델도 완벽하지 않음
+4. vectors.shape[0]=문서수 / shape[1]=차원수 → 헷갈리지 말 것
+
+## 시간복잡도 정리
+| 패턴                  | 복잡도      |
+|----------------------|-------------|
+| for i in range(n)    | O(n)        |
+| set(list)            | O(n)        |
+| sorted(list)         | O(n log n)  |
+| 이중 for루프          | O(n²)       |
+
+## 면접 답변 (일본어)
+Q: なぜ多言語モデルを選んだのか？
+A: ログドキュメントが韓国語・英語混在のため。
+   英語専用モデルでは意味検索が機能しなかった。
+
+Q: sorted_logの時間計算量は？
+A: set()がO(n)、sorted()がO(n log n)。
+   合わせてO(n log n)になります。
+
+## 내일 할 것 (Day 43)
+- 유사도 threshold 추가 (낮은 점수 필터링)
+- 문서 chunking 전략 개선
+- 0.09 낮은 유사도 점수 원인 분석

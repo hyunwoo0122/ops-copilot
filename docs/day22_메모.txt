@@ -1,0 +1,33 @@
+================================================================
+Day 22 학습 메모 (2026-04-14, 화요일)
+================================================================
+
+## 오늘 한 것
+- MLflow 첫 실험 기록 (day22_mlflow_basic.py)
+- IsolationForest baseline 실험 1회 실행
+- MLflow UI (http://127.0.0.1:5000) 에서 결과 확인
+
+## 오늘 배운 핵심 개념
+- mlflow.set_experiment() : 실험 폴더(그룹) 이름 설정
+- mlflow.start_run()      : 실험 1회 시작 (with문으로 감쌈)
+- mlflow.log_params()     : 파라미터(설정값) 기록 → 딕셔너리로 한번에
+- mlflow.log_metric()     : 결과 점수 기록 → 키-값 따로
+- set_tracking_uri("sqlite:///mlflow.db") : 결과를 파일로 저장
+
+## 오늘 고친 버그
+- return print() → return 값  (출력과 반환은 분리!)
+- 반환값을 result = 로 받지 않으면 허공으로 사라짐
+
+## 오늘 정착시킨 습관
+- 함수로 감싸기 (def)
+- 타입힌트 (list[str] -> str | None)
+- return None 명시 (중복 없을 때 의도적으로 None 반환)
+
+## MLflow param vs metric 차이
+- log_params  : 모델에 넣는 설정값 (contamination, n_estimators)
+- log_metric  : 실행 결과 점수 (f1_score, accuracy 등)
+
+## 면접 대비 포인트
+- "MLflowを使う理由は？" 
+  → 실험 파라미터와 결과를 자동 기록해서 재현성을 보장하기 위해
+================================================================

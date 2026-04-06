@@ -1,0 +1,32 @@
+# Day 41 — RAG 기본 / 2026-05-11
+
+## 오늘 한 것
+- RAG 파이프라인 직접 구현 (임베딩 → 리트리벌 → 생성)
+- cosine_similarity 수식 구현 (np.dot / np.linalg.norm)
+- build_knowledge_base / retrieve / generate_answer 완성
+
+## 핵심 코드 패턴
+```python
+# 코사인 유사도
+dot = np.dot(vec_a, vec_b)
+norm_a = np.linalg.norm(vec_a)
+norm_b = np.linalg.norm(vec_b)
+return dot / (norm_a * norm_b + 1e-8)
+
+# 인덱스 기준 정렬
+sorted(range(len(scores)), key=lambda i: scores[i], reverse=True)
+```
+
+## 오늘 배운 교훈 3가지
+1. fake_embed는 의미를 모름 → 내일 sentence-transformers로 교체
+2. 딕셔너리 key에 점수값 쓰면 중복 시 덮어씌워짐 → 인덱스로 추적
+3. sorted() 시간복잡도 = O(n log n), 상수/작은 항은 버린다
+
+## 면접 답변 (일본어)
+Q: コサイン類似度の分母に1e-8を加える理由は？
+A: ゼロベクトルが入力された場合のゼロ除算を防ぐため。
+
+## 내일 할 것 (Day 42)
+- fake_embed → sentence-transformers 교체
+- FAISS 인덱스 연결
+- CrashLoopBackOff가 1위로 올라오는지 확인
