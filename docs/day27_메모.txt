@@ -1,0 +1,59 @@
+================================================================
+Day 27 학습 메모 (2026-04-21, 화요일)
+================================================================
+
+## 반드시 외워야 할 것
+
+[Attention 공식 — 이거 면접에서 무조건 나와]
+scores          = Q · K.T / √d_k
+attention_weights = softmax(scores)
+output          = attention_weights · V
+
+순서 외우기: 점수 계산 → 스케일 → softmax → 가중합
+
+[왜 √d_k 로 나누나?]
+d_k가 크면 내적값이 커짐
+→ softmax가 한 곳에만 집중 (나머지 0에 가까워짐)
+→ 기울기 소실(勾配消失) 발생, 학습 안 됨
+→ √d_k 로 나눠서 값을 적당한 범위로 줄임
+
+[왜 softmax에서 max를 빼나?]
+exp(큰 숫자) = inf → NaN 발생
+x - x.max() 로 최댓값을 0으로 만들면 안전
+→ 수치 안정성(numerical stability)
+
+## 반드시 알아야 할 코드 패턴
+
+[softmax — 이 구현 외워둬]
+e_x = np.exp(x - x.max(axis=-1, keepdims=True))
+return e_x / e_x.sum(axis=-1, keepdims=True)
+
+[이진탐색 — 외워야 할 틀]
+left, right = 0, len(arr) - 1
+while left <= right:
+    mid = (left + right) // 2
+    if arr[mid] < threshold:
+        left = mid + 1
+    else:
+        right = mid - 1
+return len(arr) - left
+
+## 면접 Q&A — 이거 소리내서 읽어봐
+
+Q: なぜ√d_kで割るのですか？
+A: d_kが大きいと内積値が大きくなり、
+   Softmaxが一つのトークンに集中しすぎます。
+   √d_kで割ることで勾配消失を防ぎます。
+
+Q: Attentionの重みの合計が1になる理由は？
+A: Softmaxの出力の合計は必ず1になるためです。
+
+Q: 線形探索とバイナリサーチの違いは？
+A: 線形探索はO(n)、バイナリサーチはO(log n)です。
+   ただしバイナリサーチはソート済み配列が必要です。
+
+## 시간복잡도 정리
+
+for문(선형탐색): O(n)   → 데이터 100만개 = 100만번
+이진탐색       : O(log n) → 데이터 100만개 = 20번
+================================================================

@@ -1,0 +1,40 @@
+================================================================
+Day 23 학습 메모 (2026-04-15, 수요일)
+================================================================
+
+## 오늘 한 것
+- MLflow 실험 비교 (day23_mlflow_compare.py)
+- contamination 0.1 vs 0.2 두 가지 실험 실행
+- logging 모듈 도입 (print → logging.info 교체)
+- day22_mlflow_basic.py 리팩터링 (logging 적용)
+
+## 오늘 배운 핵심 개념
+- logging.basicConfig(level=logging.INFO, format=...)
+  : 타임스탬프 + 레벨 + 메시지 형식으로 출력
+- logging.info() : 일반 실행 로그
+- run_name 동적 생성 : f"IF_c{contamination}_n{n_estimators}"
+  → MLflow UI에서 실험 구분이 쉬워짐
+
+## print() 대신 logging을 쓰는 이유 3가지
+1. 타임스탬프 자동 기록 (언제 실행됐는지 앎)
+2. INFO / WARNING / ERROR 레벨 구분 가능
+3. 파일로 저장 가능 (서버에서 로그 수집)
+
+## Anti-Pattern — 오늘 피한 것
+- 매직 넘버: IsolationForest(contamination=0.2) 직접 박기 → 함수 인자로
+- 코드 복붙: 실험 코드 2번 쓰기 → run_experiment() 함수 1개로
+
+## 앞으로 개선할 것 (메모)
+- X, y_true를 전역변수로 쓰는 것 → 함수 인자로 받기 (Day 24~25)
+
+## 시간복잡도 처음 배움
+- O(n)      : for문 한 번 순회
+- O(n log n): sorted() 정렬
+- 루프 안에서 sorted() 쓰면 낭비 → 루프 밖으로 꺼내야 함
+
+## 면접 대비 포인트
+- "なぜloggingを使うのですか？"
+  → タイムスタンプとログレベルの管理、ファイル保存が可能なため
+- "時間計算量は？"
+  → ループO(n) + 最後のソートO(n log n) = 全体O(n log n)
+================================================================
