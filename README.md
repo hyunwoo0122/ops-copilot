@@ -16,8 +16,8 @@
 |------|------|
 | 目的 | サーバーログの異常を自動検知し、運用チームの対応時間を短縮 |
 | 手法 | PyTorch AutoEncoder + Self-Attention + IsolationForest |
-| 現状 | AutoEncoder学習済・実験管理・テスト導入済み |
-| 進捗 | 7週目完了（Day 35 / 全195日） |
+| 現状 | AutoEncoder + RAGパイプライン構築済み    |
+| 進捗 | 9週目完了（Day 45 / 全195日）           |
 
 ---
 
@@ -60,6 +60,14 @@
 | FPR/Recall/F1 測定 | threshold=0.7で最適化 |
 | pytest テスト | 4 passed ✅（性能回帰テスト含む） |
 
+### 9週目：RAGパイプライン構築
+| 内容 | 結果 |
+|------|------|
+| sentence-transformers 導入 | 多言語モデルで韓国語対応 |
+| FAISSベクトル検索 | IndexFlatIP + normalize_L2 |
+| 文章単位chunking | 類似度 0.23 → 0.54 向上 ✅ |
+| threshold フィルタリング | 無関係クエリを自動除外 ✅ |
+
 ---
 
 ## 🏆 全体の成果サマリー — 数字で証明
@@ -94,6 +102,7 @@
 |----------|------|
 | 言語 | Python 3.14 |
 | ML | PyTorch, scikit-learn, numpy |
+| RAG | sentence-transformers, FAISS                        |
 | 実験管理 | MLflow |
 | テスト | pytest |
 | バージョン管理 | Git（ブランチ + PR方式） |
@@ -155,7 +164,8 @@ Anti-Pattern回避 → マジックナンバー禁止・グローバル変数禁
 - [x] Week 6   : Self-Attention 実装 + LogBERT プロトタイプ
 - [x] Week 7   : PyTorch AutoEncoder + Early Stopping（42倍向上）
 - [ ] Week 8   : LogBERT 本格学習 + FPR/Recall チューニング
-- [ ] Week 9-12: RAG パイプライン構築
+- [x] Week 9  : RAG パイプライン構築（類似度0.54達成）
+- [ ] Week 10-12: RAG 評価・精度改善
 - [ ] Week 13-16: FastAPI + Docker サービス化
 - [ ] Week 17-20: AWS デプロイ + CI/CD
 
