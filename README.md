@@ -17,7 +17,7 @@
 | 目的 | サーバーログの異常を自動検知し、運用チームの対応時間を短縮 |
 | 手法 | PyTorch AutoEncoder + Self-Attention + IsolationForest |
 | 現状 | AutoEncoder + RAGパイプライン構築済み    |
-| 進捗 | 9週目完了（Day 45 / 全195日）           |
+| 進捗 | 10週目完了（Day 50 / 全195日）          |
 
 ---
 
@@ -67,6 +67,15 @@
 | FAISSベクトル検索 | IndexFlatIP + normalize_L2 |
 | 文章単位chunking | 類似度 0.23 → 0.54 向上 ✅ |
 | threshold フィルタリング | 無関係クエリを自動除外 ✅ |
+
+### 10週目：RAG評価・モデル比較
+| 内容 | 結果 |
+|------|------|
+| RAG評価セット構築 | 8問・正確度・根拠率測定 |
+| ランブック拡張 | 3件→10件 |
+| 多言語モデル | 正確度62.5% |
+| 韓国語特化モデル(ko-sroberta) | 正確度75.0% ✅ |
+| pytest | 9件通過 |
 
 ---
 
@@ -163,9 +172,10 @@ Anti-Pattern回避 → マジックナンバー禁止・グローバル変数禁
 - [x] Week 5   : MLflow 実験管理 + pytest 導入
 - [x] Week 6   : Self-Attention 実装 + LogBERT プロトタイプ
 - [x] Week 7   : PyTorch AutoEncoder + Early Stopping（42倍向上）
-- [ ] Week 8   : LogBERT 本格学習 + FPR/Recall チューニング
-- [x] Week 9  : RAG パイプライン構築（類似度0.54達成）
-- [ ] Week 10-12: RAG 評価・精度改善
+- [x] Week 8   : LogBERT 本格学習 + FPR/Recall チューニング
+- [x] Week 9   : RAG パイプライン構築（類似度0.54達成）
+- [x] Week 10  : RAG評価・モデル比較（75%達成）
+- [ ] Week 11-12: 精度改善・チューニング
 - [ ] Week 13-16: FastAPI + Docker サービス化
 - [ ] Week 17-20: AWS デプロイ + CI/CD
 
