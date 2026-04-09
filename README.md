@@ -7,6 +7,7 @@
 [![MLflow](https://img.shields.io/badge/MLflow-実験管理-orange)](https://mlflow.org/)
 [![pytest](https://img.shields.io/badge/pytest-テスト済-green)](https://pytest.org/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-学習済-red)](https://pytorch.org/)
+[![Gemini](https://img.shields.io/badge/Gemini-API連携-blue)](https://ai.google.dev/)
 
 ---
 
@@ -14,10 +15,10 @@
 
 | 項目 | 内容 |
 |------|------|
-| 目的 | サーバーログの異常を自動検知し、運用チームの対応時間を短縮 |
-| 手法 | PyTorch AutoEncoder + Self-Attention + IsolationForest |
-| 現状 | AutoEncoder + RAGパイプライン構築済み    |
-| 進捗 | 10週目完了（Day 50 / 全195日）          |
+| 目的 | サーバーログの異常を自動検知し、ランブック検索で対応時間を短縮 |
+| 手法 | PyTorch AutoEncoder + RAG（FAISS + BM25）+ LLM（Gemini） |
+| 現状 | 異常検知 + RAGパイプライン + LLM連携 構築済み |
+| 進捗 | 11週目完了（Day 55 / 全195日） |
 
 ---
 
@@ -26,6 +27,7 @@
 - 手動ログ監視による見落としリスクを削減
 - 障害対応時間の短縮
 - 正常ログのみで学習し、ラベルなしで異常を検知（Self-Supervised）
+- 日本語/韓国語の日常表現から技術用語へのマッピング（LLM活用）
 
 ---
 
@@ -77,10 +79,19 @@
 | 韓国語特化モデル(ko-sroberta) | 正確度75.0% ✅ |
 | pytest | 9件通過 |
 
+### 11週目：LLM連携 + テスト最適化
+| 内容 | 結果 |
+|------|------|
+| Gemini API連携 | 無料枠内で動作 |
+| キャッシング実装 | 重複API呼び出し削減 |
+| 指数バックオフ | 429エラー自動リトライ |
+| CrashLoopBackOff精度 | 0% → 100% ✅ |
+| pytest Mock | API費用なしでテスト |
 ---
 
 ## 🏆 全体の成果サマリー — 数字で証明
 
+### 異常検知
 | フェーズ | 手法 | 正常誤差 | 異常誤差 | 倍率 | F1 |
 |---------|------|---------|---------|------|-----|
 | 6週目 | numpy（学習なし） | 0.2707 | 0.4874 | 1.8倍 | 0.33 |
@@ -88,6 +99,13 @@
 | 8週目 | DataLoader + チューニング | - | - | - | **0.995** |
 
 → threshold=0.7: Recall=0.990 / FPR=0.000 / F1=0.995
+
+### RAG精度改善
+| フェーズ | 手法 | 正確度 |
+|---------|------|-------|
+| 10週目 | 多言語モデル | 62.5% |
+| 10週目 | 韓国語特化モデル | 75.0% |
+| 11週目 | LLM意図把握 + ハイブリッド検索 | CrashLoopBackOff 100% ✅ |
 
 ---
 
@@ -101,6 +119,16 @@
     → Early Stopping (patience=3)
     → threshold 比較
     → 正常 / 異常 判定
+
+RAG + LLM 分析パイプライン
+    ユーザークエリ（日常語）
+        → LLM (Gemini API) - 意図把握
+        → 日常語 → 技術用語に変換
+        → ハイブリッド検索 (FAISS + BM25)
+        → ベクトル検索 (意味的類似度)
+        → BM25 (キーワードマッチング)
+        → threshold フィルタリング
+        → ランブック返却
 ```
 
 ---
@@ -111,7 +139,8 @@
 |----------|------|
 | 言語 | Python 3.14 |
 | ML | PyTorch, scikit-learn, numpy |
-| RAG | sentence-transformers, FAISS                        |
+| RAG | sentence-transformers, FAISS, BM25 |
+| LLM | Gemini API (無料枠) |
 | 実験管理 | MLflow |
 | テスト | pytest |
 | バージョン管理 | Git（ブランチ + PR方式） |
@@ -119,23 +148,31 @@
 ---
 
 ## 🚀 実行方法
+
 ```bash
 # 依存関係インストール
 pip install torch scikit-learn mlflow pytest numpy pandas
+pip install sentence-transformers faiss-cpu rank-bm25
+pip install google-generativeai python-dotenv
 
-# AutoEncoder 学習・評価
+# .env ファイルを作成
+echo "GEMINI_API_KEY=your_api_key" > .env
+
+# 異常検知 学習・評価
 python notebooks/day33_logbert_train.py
 
+# RAG + LLM パイプライン実行
+python notebooks/day53_llm_intent.py
+
 # テスト実行
-pytest notebooks/test_day34.py -v
+pytest notebooks/ -v
 
-# threshold 探索
-python notebooks/day29_threshold_search.py
-
-# MLflow UI（結果確認）
+# MLflow UI（実験結果確認）
 mlflow ui
 # → http://127.0.0.1:5000
 ```
+
+---
 
 ---
 
@@ -143,13 +180,25 @@ mlflow ui
 ```
 ops-copilot/
 ├── notebooks/
-│   ├── day27_self_attention.py     # Self-Attention 実装
-│   ├── day28_logbert_proto.py      # 異常検知プロトタイプ
-│   ├── day29_threshold_search.py   # threshold 探索
-│   ├── day32_pytorch_autoencoder.py # PyTorch AutoEncoder
-│   ├── day33_logbert_train.py      # Early Stopping + モデル保存
-│   └── test_day34.py               # pytest テスト（4ケース）
-├── data/                           # ログデータ
+│   ├── day27_self_attention.py       # Self-Attention 実装
+│   ├── day28_logbert_proto.py        # 異常検知プロトタイプ
+│   ├── day29_threshold_search.py     # threshold 探索
+│   ├── day32_pytorch_autoencoder.py  # PyTorch AutoEncoder
+│   ├── day33_logbert_train.py        # Early Stopping + モデル保存
+│   ├── day41_rag_basic.py            # RAG基礎（cosine類似度）
+│   ├── day42_rag_embed.py            # sentence-transformers + FAISS
+│   ├── day43_rag_chunk.py            # chunking + threshold
+│   ├── day44_rag_sentence_chunk.py   # 文章単位chunking
+│   ├── day47_rag_expand.py           # ランブック10件 + 評価
+│   ├── day51_hybrid_search.py        # FAISS + BM25ハイブリッド
+│   ├── day52_generalized_eval.py     # シナリオ別汎用評価
+│   ├── day53_llm_intent.py           # LLM意図把握 + RAG
+│   ├── test_day34.py                 # pytest（異常検知）
+│   ├── test_day48.py                 # pytest（RAG）
+│   └── test_day54.py                 # pytest Mock（LLM）
+├── data/                             # ログデータ
+├── .env                              # APIキー（Git管理外）
+├── .gitignore                        # .env を除外
 └── README.md
 ```
 
@@ -157,11 +206,13 @@ ops-copilot/
 
 ## 💡 開発で意識していること
 ```
-コードの可読性  → 型ヒント・docstring・命名規則
-再現性          → random seed固定・MLflow実験記録
-テスト習慣      → pytest・正常/境界値/エッジケース
-Anti-Pattern回避 → マジックナンバー禁止・グローバル変数禁止
-過学習防止      → Early Stopping・モデル保存
+コードの可読性    → 型ヒント・docstring・命名規則
+再現性            → random seed固定・MLflow実験記録
+テスト習慣        → pytest・Mock・正常/境界値/エッジケース
+Anti-Pattern回避  → マジックナンバー禁止・グローバル変数禁止
+過学習防止        → Early Stopping・モデル保存
+API最適化         → キャッシング・指数バックオフ・폴백
+一般化            → 特定ケースへのOverfitting防止
 ```
 
 ---
@@ -175,7 +226,8 @@ Anti-Pattern回避 → マジックナンバー禁止・グローバル変数禁
 - [x] Week 8   : LogBERT 本格学習 + FPR/Recall チューニング
 - [x] Week 9   : RAG パイプライン構築（類似度0.54達成）
 - [x] Week 10  : RAG評価・モデル比較（75%達成）
-- [ ] Week 11-12: 精度改善・チューニング
+- [x] Week 11 : LLM連携・CrashLoopBackOff 0%→100%
+- [ ] Week 12 : RAG精度改善・チューニング
 - [ ] Week 13-16: FastAPI + Docker サービス化
 - [ ] Week 17-20: AWS デプロイ + CI/CD
 
