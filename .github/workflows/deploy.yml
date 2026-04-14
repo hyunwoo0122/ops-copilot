@@ -1,0 +1,35 @@
+name: Deploy to ECR
+
+on:
+  push:
+    branches:
+      - main        # main 브랜치에 push할 때만 실행
+
+env:
+  AWS_REGION:    ap-northeast-1
+  ECR_REGISTRY:  106281192812.dkr.ecr.ap-northeast-1.amazonaws.com
+  ECR_REPOSITORY: ops-copilot
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest   # GitHub 제공 우분투 서버
+
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v3
+
+      - name: AWS 자격증명 설정
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region:            ${{ env.AWS_REGION }}
+
+      - name: ECR 로그인
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Docker 이미지 빌드 & Push
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY::latest.
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY::latest
