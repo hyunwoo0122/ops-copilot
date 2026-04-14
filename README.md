@@ -87,6 +87,22 @@
 | 指数バックオフ | 429エラー自動リトライ |
 | CrashLoopBackOff精度 | 0% → 100% ✅ |
 | pytest Mock | API費用なしでテスト |
+
+### 12週目：FastAPI + Docker サービス化
+| 内容 | 結果 |
+|------|------|
+| FastAPI 基本構造 + ミドルウェア | リクエスト時間自動記録 ✅ |
+| 非同期処理（asyncio） | 応答時間 14秒→4秒（70%短縮）✅ |
+| Dockerコンテナ化 | ローカル1-click実行 ✅ |
+| pytest TestClient + Mock | APIコストなしでテスト ✅ |
+
+### 13週目：AWS デプロイ + CI/CD + IaC
+| 内容 | 結果 |
+|------|------|
+| AWS IAM + ECR | Dockerイメージpush成功 ✅ |
+| ECS Fargate デプロイ | http://18.181.226.89:8000/health 確認 ✅ |
+| GitHub Actions CI/CD | mainブランチpush→ECR自動デプロイ ✅ |
+| Terraform IaC | ECR + セキュリティグループをコードで管理 ✅ |
 ---
 
 ## 🏆 全体の成果サマリー — 数字で証明
@@ -144,6 +160,9 @@ RAG + LLM 分析パイプライン
 | 実験管理 | MLflow |
 | テスト | pytest |
 | バージョン管理 | Git（ブランチ + PR方式） |
+| API | FastAPI, uvicorn |
+| インフラ | Docker, AWS ECR, ECS Fargate |
+| CI/CD・IaC | GitHub Actions, Terraform |
 
 ---
 
@@ -196,6 +215,17 @@ ops-copilot/
 │   ├── test_day34.py                 # pytest（異常検知）
 │   ├── test_day48.py                 # pytest（RAG）
 │   └── test_day54.py                 # pytest Mock（LLM）
+│   ├── day56_fastapi_basic.py        # FastAPI 基本構造
+│   ├── day57_fastapi_middleware.py   # ミドルウェア + エラー処理
+│   ├── day58_fastapi_async.py        # 非同期処理 + Docker
+│   ├── test_day59.py                 # pytest TestClient
+├── .github/
+│   └── workflows/
+│       └── deploy.yml                # GitHub Actions CI/CD
+├── terraform/
+│   └── main.tf                       # Terraform IaC
+├── Dockerfile                        # Dockerコンテナ設定
+├── requirements.txt                  # パッケージ一覧
 ├── data/                             # ログデータ
 ├── .env                              # APIキー（Git管理外）
 ├── .gitignore                        # .env を除外
@@ -227,7 +257,10 @@ API最適化         → キャッシング・指数バックオフ・폴백
 - [x] Week 9   : RAG パイプライン構築（類似度0.54達成）
 - [x] Week 10  : RAG評価・モデル比較（75%達成）
 - [x] Week 11 : LLM連携・CrashLoopBackOff 0%→100%
-- [ ] Week 12 : RAG精度改善・チューニング
+- [x] Week 12 : FastAPI + Docker サービス化（応答時間70%短縮）
+- [x] Week 13 : AWS ECR/ECS + GitHub Actions CI/CD + Terraform IaC
+- [ ] Week 14-16: 負荷テスト（locust）+ モニタリング
+- [ ] Week 17-20: AWS デプロイ最適化 + コスト管理
 - [ ] Week 13-16: FastAPI + Docker サービス化
 - [ ] Week 17-20: AWS デプロイ + CI/CD
 
