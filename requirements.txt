@@ -1,0 +1,16 @@
+# 웹 서버 관련
+fastapi==0.135.2
+uvicorn==0.42.0
+python-dotenv==1.2.2
+
+# AI / 검색 관련
+google-generativeai==0.8.6
+sentence-transformers==5.3.0
+faiss-cpu==1.13.2
+rank-bm25==0.2.2
+
+# 데이터 및 학습 관련
+torch==2.11.0
+numpy==2.4.3
+pandas==2.3.3
+scikit-learn==1.8.0
