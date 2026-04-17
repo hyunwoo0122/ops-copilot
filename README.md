@@ -18,7 +18,7 @@
 | 目的 | サーバーログの異常を自動検知し、ランブック検索で対応時間を短縮 |
 | 手法 | PyTorch AutoEncoder + RAG（FAISS + BM25）+ LLM（Gemini） |
 | 現状 | 異常検知 + RAGパイプライン + LLM連携 構築済み |
-| 進捗 | 11週目完了（Day 55 / 全195日） |
+| 進捗 | 14週目完了（Day 70 / 全195日） |
 
 ---
 
@@ -103,6 +103,15 @@
 | ECS Fargate デプロイ | http://18.181.226.89:8000/health 確認 ✅ |
 | GitHub Actions CI/CD | mainブランチpush→ECR自動デプロイ ✅ |
 | Terraform IaC | ECR + セキュリティグループをコードで管理 ✅ |
+
+### 14週目：ロードテスト + キャッシング + モニタリング
+| 内容 | 結果 |
+|------|------|
+| locust ロードテスト | 失敗率24%・p95 23秒 確認 ✅ |
+| TTLキャッシング実装 | 同一クエリ2回目からキャッシュ返却 ✅ |
+| CloudWatch メトリクス | ResponseTime送信 + アラーム設定 ✅ |
+| pytest キャッシュ性能テスト | 3個全て通過 ✅ |
+
 ---
 
 ## 🏆 全体の成果サマリー — 数字で証明
@@ -259,9 +268,8 @@ API最適化         → キャッシング・指数バックオフ・폴백
 - [x] Week 11 : LLM連携・CrashLoopBackOff 0%→100%
 - [x] Week 12 : FastAPI + Docker サービス化（応答時間70%短縮）
 - [x] Week 13 : AWS ECR/ECS + GitHub Actions CI/CD + Terraform IaC
-- [ ] Week 14-16: 負荷テスト（locust）+ モニタリング
-- [ ] Week 17-20: AWS デプロイ最適化 + コスト管理
-- [ ] Week 13-16: FastAPI + Docker サービス化
-- [ ] Week 17-20: AWS デプロイ + CI/CD
+- [x] Week 14 : locust ロードテスト + TTLキャッシング + CloudWatch監視
+- [ ] Week 15-16: 負荷テスト改善 + コスト最適化
+- [ ] Week 17-20: AWS デプロイ最適化 + オートスケーリング
 
 ---
