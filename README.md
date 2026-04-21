@@ -18,8 +18,7 @@
 | 目的 | サーバーログの異常を自動検知し、ランブック検索で対応時間を短縮 |
 | 手法 | PyTorch AutoEncoder + RAG（FAISS + BM25）+ LLM（Gemini） |
 | 現状 | 異常検知 + RAGパイプライン + LLM連携 構築済み |
-| 進捗 | 14週目完了（Day 70 / 全195日） |
-
+| 進捗 | 15週目完了（Day 75 / 全195日） |
 ---
 
 ## 🔍 解決する課題
@@ -112,6 +111,15 @@
 | CloudWatch メトリクス | ResponseTime送信 + アラーム設定 ✅ |
 | pytest キャッシュ性能テスト | 3個全て通過 ✅ |
 
+### 15週目：SQS非同期キュー + オートスケーリング + テスト
+| 内容 | 結果 |
+|------|------|
+| SQS キュー生성 + メッセージ送受信 | ✅ |
+| Producer/Consumer 役割分離 | ✅ |
+| SQS Worker 無限ループ実装 | ✅ |
+| ECS オートスケーリング Terraform | CPU70%・最小1・最大3 ✅ |
+| SQS Mock pytest | 4個全て通過 ✅ |
+
 ---
 
 ## 🏆 全体の成果サマリー — 数字で証明
@@ -172,6 +180,7 @@ RAG + LLM 分析パイプライン
 | API | FastAPI, uvicorn |
 | インフラ | Docker, AWS ECR, ECS Fargate |
 | CI/CD・IaC | GitHub Actions, Terraform |
+| メッセージキュー | AWS SQS |
 
 ---
 
@@ -269,7 +278,8 @@ API最適化         → キャッシング・指数バックオフ・폴백
 - [x] Week 12 : FastAPI + Docker サービス化（応答時間70%短縮）
 - [x] Week 13 : AWS ECR/ECS + GitHub Actions CI/CD + Terraform IaC
 - [x] Week 14 : locust ロードテスト + TTLキャッシング + CloudWatch監視
-- [ ] Week 15-16: 負荷テスト改善 + コスト最適化
+- [x] Week 15 : SQS非同期キュー + ECSオートスケーリング + Mock pytest
+- [ ] Week 16: 負荷テスト改善 + コスト最適化
 - [ ] Week 17-20: AWS デプロイ最適化 + オートスケーリング
 
 ---
